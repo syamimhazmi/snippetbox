@@ -1,11 +1,25 @@
 package main
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
 )
 
 func main() {
+	// Use the slow.New() function to initialize a new structured logger, which
+	// writes to the standard out stream and uses the default settings.
+	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		AddSource: true,
+		Level:     slog.LevelInfo,
+	}))
+
+	_, err := os.Stat(".env")
+	if err != nil {
+		logger.Error(".env file not found")
+		os.Exit(1)
+	}
+
 	mux := http.NewServeMux()
 
 	// Create a file server which serves files out of the "./ui/static" directory.
@@ -23,8 +37,8 @@ func main() {
 	mux.HandleFunc("GET /snippet/create", snippetCreate)
 	mux.HandleFunc("POST /snippet/store", snippetStore)
 
-	log.Print("starting server on :4000")
+	logger.Info("starting server on :4000")
 
-	err := http.ListenAndServe(":4000", mux)
-	log.Fatal(err)
+	err = http.ListenAndServe(":4000", mux)
+	logger.Error(err.Error())
 }
