@@ -24,8 +24,7 @@ func (app *Application) home(w http.ResponseWriter, r *http.Request) {
 	// of the files slice as variadic arguments.
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
-		app.logger.Error(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		app.serverError(w, r, err)
 		return
 	}
 
@@ -33,8 +32,7 @@ func (app *Application) home(w http.ResponseWriter, r *http.Request) {
 	// template as the response body
 	err = ts.ExecuteTemplate(w, "base", nil)
 	if err != nil {
-		app.logger.Error(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		app.serverError(w, r, err)
 	}
 
 	w.Write([]byte("Hello from snippetbox"))
