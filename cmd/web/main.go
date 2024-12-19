@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/joho/godotenv"
 )
 
@@ -29,15 +32,32 @@ func main() {
 		os.Exit(1)
 	}
 
+	dbString := fmt.Sprintf("%s://%s:%s@%s:%s/%s",
+		os.Getenv("DB_CONNECTION"),
+		os.Getenv("DB_USERNAME"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_NAME"),
+	)
+
+	conn, err := pgx.Connect(context.Background(), dbString)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		logger.Error("Unable to connect to database")
+		os.Exit(1)
+	}
+	defer conn.Close(context.Background())
+
 	app := &Application{
 		logger: logger,
 	}
 
 	mux := app.routes()
 
-	logger.Info("starting server on :4000")
+	logger.Info("starting server", "port", os.Getenv("APP_PORT"))
 
-	err = http.ListenAndServe(":4000", mux)
+	err = http.ListenAndServe(os.Getenv("APP_PORT"), mux)
 	logger.Error(err.Error())
 	os.Exit(1)
 }
