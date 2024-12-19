@@ -4,6 +4,8 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 // Define an application struct to hold the application-wide dependencies for the
@@ -21,9 +23,9 @@ func main() {
 		Level:     slog.LevelInfo,
 	}))
 
-	_, err := os.Stat(".env")
+	err := godotenv.Load()
 	if err != nil {
-		logger.Error(".env file not found")
+		logger.Error("Error loading .env file")
 		os.Exit(1)
 	}
 
