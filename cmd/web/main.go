@@ -16,6 +16,7 @@ import (
 // add more to this as the build progresses
 type Application struct {
 	logger *slog.Logger
+	db     *pgx.Conn
 }
 
 func main() {
@@ -56,6 +57,7 @@ func main() {
 
 	app := &Application{
 		logger: logger,
+		db:     conn,
 	}
 
 	mux := app.routes()
