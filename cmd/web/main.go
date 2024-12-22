@@ -9,14 +9,16 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/joho/godotenv"
+	"github.com/syamimhazmi/snippetbox/internal/models"
 )
 
 // Define an application struct to hold the application-wide dependencies for the
 // web application. For now we'll only include the structured logger, but we'll
 // add more to this as the build progresses
 type Application struct {
-	logger *slog.Logger
-	db     *pgx.Conn
+	env      string
+	logger   *slog.Logger
+	snippets *models.SnippetModel
 }
 
 func main() {
@@ -56,8 +58,9 @@ func main() {
 	defer conn.Close(context.Background())
 
 	app := &Application{
-		logger: logger,
-		db:     conn,
+		env:      os.Getenv("APP_ENV"),
+		logger:   logger,
+		snippets: &models.SnippetModel{DB: conn},
 	}
 
 	mux := app.routes()
