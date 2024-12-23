@@ -1,6 +1,7 @@
 package models
 
 import (
+	"context"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -18,8 +19,19 @@ type SnippetModel struct {
 	DB *pgx.Conn
 }
 
-func Insert(title string, content string, expires int) (int, error) {
-	return 0, nil
+func (sm *SnippetModel) Insert(title string, content string, expires int) (int, error) {
+	stmt := `insert into snippets(title, content, expires_at, created_at)
+	values($1,$2, current_timestamp at time zone 'utc', current_timestamp at time zone 'utc', '$3 day'::INTERVAL)
+	returning id
+	`
+
+	var id int
+	err := sm.DB.QueryRow(context.Background(), stmt, title, content, expires).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
 }
 
 func Get(id int) (Snippet, error) {
