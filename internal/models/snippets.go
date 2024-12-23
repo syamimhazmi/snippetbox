@@ -20,8 +20,13 @@ type SnippetModel struct {
 }
 
 func (sm *SnippetModel) Insert(title string, content string, expires int) (int, error) {
-	stmt := `insert into snippets(title, content, expires_at, created_at)
-	values($1,$2, current_timestamp at time zone 'utc', current_timestamp at time zone 'utc', '$3 day'::INTERVAL)
+	stmt := `insert into snippets(title, content, expired_at, created_at)
+	values(
+		$1,
+		$2, 
+		current_timestamp at time zone 'utc' + $3 * interval '1 day',
+		current_timestamp at time zone 'utc' 
+	)
 	returning id
 	`
 
