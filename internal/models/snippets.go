@@ -6,13 +6,14 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Snippet struct {
 	ID      int
 	Title   string
 	Content string
-	Created time.Time
+	Created pgtype.Timestamp
 	Expires time.Time
 }
 
@@ -21,6 +22,13 @@ type SnippetModel struct {
 }
 
 func (sm *SnippetModel) Insert(title string, content string, expires int) (int, error) {
+	tx, err := sm.DB.Begin(context.Background())
+	if err != nil {
+		return 0, err
+	}
+
+	defer tx.Rollback(context.Background())
+
 	stmt := `insert into snippets(title, content, expired_at, created_at, updated_at)
 	values(
 		$1,
@@ -33,7 +41,12 @@ func (sm *SnippetModel) Insert(title string, content string, expires int) (int, 
 	`
 
 	var id int
-	err := sm.DB.QueryRow(context.Background(), stmt, title, content, expires).Scan(&id)
+	err = tx.QueryRow(context.Background(), stmt, title, content, expires).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+
+	err = tx.Commit(context.Background())
 	if err != nil {
 		return 0, err
 	}
