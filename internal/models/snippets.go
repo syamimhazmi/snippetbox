@@ -70,6 +70,37 @@ func (sm *SnippetModel) Get(id int) (Snippet, error) {
 	return s, nil
 }
 
-func Latest() ([]Snippet, error) {
-	return nil, nil
+func (sm *SnippetModel) Latest() ([]Snippet, error) {
+	stmt := `select id, title, content, expired_at, created_at
+	from snippets
+	where expired_at > (current_timestamp at time zone 'utc')
+	order by id desc
+	limit 10
+	`
+
+	rows, err := sm.DB.Query(context.Background(), stmt)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var snippets []Snippet
+	for rows.Next() {
+		var snippet Snippet
+
+		err = rows.Scan(&snippet.ID, &snippet.Title, &snippet.Content, &snippet.Expires, &snippet.Created)
+		if err != nil {
+			return nil, err
+		}
+
+		snippets = append(snippets, snippet)
+	}
+
+	// never assume the itteration is complete even no error is shown.
+	// always make sure to handle the error
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return snippets, nil
 }
