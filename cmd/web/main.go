@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 	"os"
@@ -34,6 +35,8 @@ func main() {
 	}
 
 	conn := database.New(logger)
+
+	defer conn.Close(context.Background())
 
 	app := &Application{
 		env:      os.Getenv("APP_ENV"),

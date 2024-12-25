@@ -30,7 +30,6 @@ func New(logger *slog.Logger) *pgx.Conn {
 		logger.Error("Failed to established connection", "error", err)
 		os.Exit(1)
 	}
-	defer conn.Close(context.Background())
 
 	return conn
 }
