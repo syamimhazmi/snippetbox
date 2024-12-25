@@ -47,6 +47,7 @@ func (app *Application) render(
 	// execute the template set and write the response body
 	err := ts.ExecuteTemplate(w, "base", data)
 	if err != nil {
+		fmt.Printf("error: %+v\n", err)
 		app.serverError(w, r, err)
 	}
 }
