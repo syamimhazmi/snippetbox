@@ -6,14 +6,13 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Snippet struct {
 	ID      int
 	Title   string
 	Content string
-	Created pgtype.Timestamp
+	Created time.Time
 	Expires time.Time
 }
 
