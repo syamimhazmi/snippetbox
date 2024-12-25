@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"html/template"
 	"log/slog"
 	"net/http"
 	"os"
@@ -15,9 +16,10 @@ import (
 // web application. For now we'll only include the structured logger, but we'll
 // add more to this as the build progresses
 type Application struct {
-	env      string
-	logger   *slog.Logger
-	snippets *models.SnippetModel
+	env           string
+	logger        *slog.Logger
+	snippets      *models.SnippetModel
+	templateCache map[string]*template.Template
 }
 
 func main() {
@@ -38,10 +40,17 @@ func main() {
 
 	defer conn.Close(context.Background())
 
+	templateCache, err := newTemplateCache()
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
 	app := &Application{
-		env:      os.Getenv("APP_ENV"),
-		logger:   logger,
-		snippets: &models.SnippetModel{DB: conn},
+		env:           os.Getenv("APP_ENV"),
+		logger:        logger,
+		snippets:      &models.SnippetModel{DB: conn},
+		templateCache: templateCache,
 	}
 
 	mux := app.routes()
