@@ -4,20 +4,45 @@
 <form action='/snippets/store' method='POST'>
     <div>
         <label>Title:</label>
-        <input type='text' name='title' required>
+
+        {{with .Form.FieldErrors.title}}
+            <label class='error'>{{.}}</label>
+        {{end}}
+
+        <input type='text' name='title' value="{{.Form.Title}}">
     </div>
 
 
     <div>
         <label>Content:</label>
-        <textarea name='content' required></textarea>
+
+        {{with .Form.FieldErrors.content}}
+            <label class='error'>{{.}}</label>
+        {{end}}
+
+        <textarea name='content'>{{.Form.Content}}</textarea>
     </div>
 
     <div>
         <label>Expires in:</label>
-        <input type='radio' name='expires' value='365' checked required/> One year
-        <input type='radio' name='expires' value='7'/> One week
-        <input type='radio' name='expires' value='1'/> One day
+
+        {{with .Form.FieldErrors.expires}}
+            <label class='error'>{{.}}</label>
+        {{end}}
+
+        <input type='radio' 
+            name='expires' 
+            value='365' 
+            {{if (eq .Form.Expires 365)}} checked {{end}}
+            required/> One year
+        <input type='radio' 
+            name='expires' 
+            {{if (eq .Form.Expires 7)}} checked {{end}}
+            value='7'/> One week
+        <input type='radio' 
+            name='expires' 
+            {{if (eq .Form.Expires 1)}} checked {{end}}
+            value='1'/> One day
     </div>
 
     <div>
