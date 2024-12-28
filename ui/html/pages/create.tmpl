@@ -4,20 +4,20 @@
 <form action='/snippets/store' method='POST'>
     <div>
         <label>Title:</label>
-        <input type='text' name='title'>
+        <input type='text' name='title' required>
     </div>
 
 
     <div>
         <label>Content:</label>
-        <textarea name='content'></textarea>
+        <textarea name='content' required></textarea>
     </div>
 
     <div>
         <label>Expires in:</label>
-        <input type='radio' name='expires' value='365' checked/> One year
-        <input type='radio' name='expires' value='7' /> One week
-        <input type='radio' name='expires' value='1' /> One day
+        <input type='radio' name='expires' value='365' checked required/> One year
+        <input type='radio' name='expires' value='7'/> One week
+        <input type='radio' name='expires' value='1'/> One day
     </div>
 
     <div>
