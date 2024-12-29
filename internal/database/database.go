@@ -6,10 +6,10 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func New(logger *slog.Logger) *pgx.Conn {
+func New(logger *slog.Logger) *pgxpool.Pool {
 	dbDSN := fmt.Sprintf("%s://%s:%s@%s:%s/%s",
 		os.Getenv("DB_CONNECTION"),
 		os.Getenv("DB_USERNAME"),
@@ -19,17 +19,17 @@ func New(logger *slog.Logger) *pgx.Conn {
 		os.Getenv("DB_NAME"),
 	)
 
-	conn, err := pgx.Connect(context.Background(), dbDSN)
+	pool, err := pgxpool.New(context.Background(), dbDSN)
 	if err != nil {
 		logger.Error("Unable to connect to database", "error", err)
 		os.Exit(1)
 	}
 
-	err = conn.Ping(context.Background())
+	err = pool.Ping(context.Background())
 	if err != nil {
 		logger.Error("Failed to established connection", "error", err)
 		os.Exit(1)
 	}
 
-	return conn
+	return pool
 }

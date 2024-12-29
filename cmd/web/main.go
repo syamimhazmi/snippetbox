@@ -1,12 +1,14 @@
 package main
 
 import (
-	"context"
 	"html/template"
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 
+	"github.com/alexedwards/scs/pgxstore"
+	"github.com/alexedwards/scs/v2"
 	"github.com/go-playground/form/v4"
 	"github.com/joho/godotenv"
 	"github.com/syamimhazmi/snippetbox/internal/database"
@@ -17,11 +19,12 @@ import (
 // web application. For now we'll only include the structured logger, but we'll
 // add more to this as the build progresses
 type Application struct {
-	env           string
-	logger        *slog.Logger
-	snippets      *models.SnippetModel
-	templateCache map[string]*template.Template
-	formDecoder   *form.Decoder
+	env            string
+	logger         *slog.Logger
+	snippets       *models.SnippetModel
+	templateCache  map[string]*template.Template
+	formDecoder    *form.Decoder
+	sessionManager *scs.SessionManager
 }
 
 func main() {
@@ -38,9 +41,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	conn := database.New(logger)
+	pool := database.New(logger)
 
-	defer conn.Close(context.Background())
+	defer pool.Close()
 
 	templateCache, err := newTemplateCache()
 	if err != nil {
@@ -50,12 +53,17 @@ func main() {
 
 	formDecoder := form.NewDecoder()
 
+	sessionManager := scs.New()
+	sessionManager.Store = pgxstore.New(pool)
+	sessionManager.Lifetime = 12 * time.Hour
+
 	app := &Application{
-		env:           os.Getenv("APP_ENV"),
-		logger:        logger,
-		snippets:      &models.SnippetModel{DB: conn},
-		templateCache: templateCache,
-		formDecoder:   formDecoder,
+		env:            os.Getenv("APP_ENV"),
+		logger:         logger,
+		snippets:       &models.SnippetModel{DB: pool},
+		templateCache:  templateCache,
+		formDecoder:    formDecoder,
+		sessionManager: sessionManager,
 	}
 
 	mux := app.routes()
