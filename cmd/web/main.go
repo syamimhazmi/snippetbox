@@ -66,11 +66,14 @@ func main() {
 		sessionManager: sessionManager,
 	}
 
-	mux := app.routes()
+	srv := &http.Server{
+		Addr:    os.Getenv("APP_PORT"),
+		Handler: app.routes(),
+	}
 
-	logger.Info("starting server", "port", os.Getenv("APP_PORT"))
+	logger.Info("starting server", "port", srv.Addr)
 
-	err = http.ListenAndServe(os.Getenv("APP_PORT"), mux)
+	err = srv.ListenAndServe()
 	logger.Error(err.Error())
 	os.Exit(1)
 }
