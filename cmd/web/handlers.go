@@ -105,5 +105,7 @@ func (app *Application) snippetStore(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, r, err)
 	}
 
+	app.sessionManager.Put(r.Context(), "flash", "Snippet successfully created!")
+
 	http.Redirect(w, r, fmt.Sprintf("/snippets/view/%d", id), http.StatusSeeOther)
 }
