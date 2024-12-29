@@ -21,6 +21,7 @@ import (
 type Application struct {
 	env            string
 	logger         *slog.Logger
+	users          *models.UserModel
 	snippets       *models.SnippetModel
 	templateCache  map[string]*template.Template
 	formDecoder    *form.Decoder
@@ -60,6 +61,7 @@ func main() {
 	app := &Application{
 		env:            os.Getenv("APP_ENV"),
 		logger:         logger,
+		users:          &models.UserModel{DB: pool},
 		snippets:       &models.SnippetModel{DB: pool},
 		templateCache:  templateCache,
 		formDecoder:    formDecoder,
