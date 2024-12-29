@@ -11,10 +11,10 @@ import (
 )
 
 type SnippetCreateForm struct {
-	Title   string
-	Content string
-	Expires int
-	validator.Validator
+	Title               string `form:"title"`
+	Content             string `form:"content"`
+	Expires             int    `form:"expires"`
+	validator.Validator `form:"-"`
 }
 
 func (app *Application) home(w http.ResponseWriter, r *http.Request) {
@@ -64,22 +64,12 @@ func (app *Application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) snippetStore(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
+	var form SnippetCreateForm
+
+	err := app.decodePostForm(r, &form)
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
 		return
-	}
-
-	expires, err := strconv.Atoi(r.PostForm.Get("expires"))
-	if err != nil {
-		app.clientError(w, http.StatusBadRequest)
-		return
-	}
-
-	form := SnippetCreateForm{
-		Title:   r.PostForm.Get("title"),
-		Content: r.PostForm.Get("content"),
-		Expires: expires,
 	}
 
 	form.CheckField(

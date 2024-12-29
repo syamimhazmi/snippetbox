@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/go-playground/form/v4"
 	"github.com/joho/godotenv"
 	"github.com/syamimhazmi/snippetbox/internal/database"
 	"github.com/syamimhazmi/snippetbox/internal/models"
@@ -20,6 +21,7 @@ type Application struct {
 	logger        *slog.Logger
 	snippets      *models.SnippetModel
 	templateCache map[string]*template.Template
+	formDecoder   *form.Decoder
 }
 
 func main() {
@@ -46,11 +48,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	formDecoder := form.NewDecoder()
+
 	app := &Application{
 		env:           os.Getenv("APP_ENV"),
 		logger:        logger,
 		snippets:      &models.SnippetModel{DB: conn},
 		templateCache: templateCache,
+		formDecoder:   formDecoder,
 	}
 
 	mux := app.routes()
