@@ -67,8 +67,9 @@ func main() {
 	}
 
 	srv := &http.Server{
-		Addr:    os.Getenv("APP_PORT"),
-		Handler: app.routes(),
+		Addr:     os.Getenv("APP_PORT"),
+		Handler:  app.routes(),
+		ErrorLog: slog.NewLogLogger(logger.Handler(), slog.LevelError),
 	}
 
 	logger.Info("starting server", "port", srv.Addr)
