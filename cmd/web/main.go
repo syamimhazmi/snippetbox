@@ -67,9 +67,12 @@ func main() {
 	}
 
 	srv := &http.Server{
-		Addr:     os.Getenv("APP_PORT"),
-		Handler:  app.routes(),
-		ErrorLog: slog.NewLogLogger(logger.Handler(), slog.LevelError),
+		Addr:         os.Getenv("APP_PORT"),
+		Handler:      app.routes(),
+		ErrorLog:     slog.NewLogLogger(logger.Handler(), slog.LevelError),
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	logger.Info("starting server", "port", srv.Addr)

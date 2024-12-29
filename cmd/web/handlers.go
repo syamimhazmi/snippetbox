@@ -17,6 +17,26 @@ type SnippetCreateForm struct {
 	validator.Validator `form:"-"`
 }
 
+func (app *Application) signup(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Display a form for signing up a new user...")
+}
+
+func (app *Application) signupPost(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Create a new user...")
+}
+
+func (app *Application) login(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Display a form for logging in a user...")
+}
+
+func (app *Application) loginPost(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Authenticate and login the user...")
+}
+
+func (app *Application) logout(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Logout the user...")
+}
+
 func (app *Application) home(w http.ResponseWriter, r *http.Request) {
 	snippets, err := app.snippets.Latest()
 	if err != nil {

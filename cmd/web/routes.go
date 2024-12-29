@@ -22,6 +22,29 @@ func (app *Application) routes() http.Handler {
 
 	dynamicMiddleware := alice.New(app.sessionManager.LoadAndSave)
 
+	// Basic authentication routes
+	mux.Handle(
+		"GET /signup",
+		dynamicMiddleware.ThenFunc(app.signup),
+	)
+	mux.Handle(
+		"POST /signup",
+		dynamicMiddleware.ThenFunc(app.signupPost),
+	)
+	mux.Handle(
+		"GET /login",
+		dynamicMiddleware.ThenFunc(app.login),
+	)
+	mux.Handle(
+		"POST /login",
+		dynamicMiddleware.ThenFunc(app.loginPost),
+	)
+	mux.Handle(
+		"POST /logout",
+		dynamicMiddleware.ThenFunc(app.logout),
+	)
+
+	// Application routes
 	mux.Handle(
 		"GET /{$}",
 		dynamicMiddleware.ThenFunc(app.home),
