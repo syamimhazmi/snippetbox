@@ -20,46 +20,47 @@ func (app *Application) routes() http.Handler {
 	// "/static" prefix before the request reaches the file server
 	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
 
-	dynamicMiddleware := alice.New(app.sessionManager.LoadAndSave)
+	guestMiddleware := alice.New(app.sessionManager.LoadAndSave)
 
-	// Basic authentication routes
+	// Guest middleware
 	mux.Handle(
 		"GET /signup",
-		dynamicMiddleware.ThenFunc(app.signup),
+		guestMiddleware.ThenFunc(app.signup),
 	)
 	mux.Handle(
 		"POST /signup",
-		dynamicMiddleware.ThenFunc(app.signupPost),
+		guestMiddleware.ThenFunc(app.signupPost),
 	)
 	mux.Handle(
 		"GET /login",
-		dynamicMiddleware.ThenFunc(app.login),
+		guestMiddleware.ThenFunc(app.login),
 	)
 	mux.Handle(
 		"POST /login",
-		dynamicMiddleware.ThenFunc(app.loginPost),
+		guestMiddleware.ThenFunc(app.loginPost),
 	)
-	mux.Handle(
-		"POST /logout",
-		dynamicMiddleware.ThenFunc(app.logout),
-	)
-
-	// Application routes
 	mux.Handle(
 		"GET /{$}",
-		dynamicMiddleware.ThenFunc(app.home),
+		guestMiddleware.ThenFunc(app.home),
 	)
 	mux.Handle(
 		"GET /snippets/view/{id}",
-		dynamicMiddleware.ThenFunc(app.snippetView),
+		guestMiddleware.ThenFunc(app.snippetView),
 	)
+
+	authMiddleware := guestMiddleware.Append(app.requireAuthentication)
+
 	mux.Handle(
 		"GET /snippets/create",
-		dynamicMiddleware.ThenFunc(app.snippetCreate),
+		authMiddleware.ThenFunc(app.snippetCreate),
 	)
 	mux.Handle(
 		"POST /snippets/store",
-		dynamicMiddleware.ThenFunc(app.snippetStore),
+		authMiddleware.ThenFunc(app.snippetStore),
+	)
+	mux.Handle(
+		"POST /logout",
+		authMiddleware.ThenFunc(app.logout),
 	)
 
 	standardMiddleware := alice.New(app.recoverPanic, app.logRequest, commonHeaders)
