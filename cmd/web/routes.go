@@ -20,35 +20,39 @@ func (app *Application) routes() http.Handler {
 	// "/static" prefix before the request reaches the file server
 	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
 
-	guestMiddleware := alice.New(app.sessionManager.LoadAndSave, noSurf)
+	dynamicMiddleware := alice.New(
+		app.sessionManager.LoadAndSave,
+		noSurf,
+		app.authenticate,
+	)
 
 	// Guest middleware
 	mux.Handle(
 		"GET /signup",
-		guestMiddleware.ThenFunc(app.signup),
+		dynamicMiddleware.ThenFunc(app.signup),
 	)
 	mux.Handle(
 		"POST /signup",
-		guestMiddleware.ThenFunc(app.signupPost),
+		dynamicMiddleware.ThenFunc(app.signupPost),
 	)
 	mux.Handle(
 		"GET /login",
-		guestMiddleware.ThenFunc(app.login),
+		dynamicMiddleware.ThenFunc(app.login),
 	)
 	mux.Handle(
 		"POST /login",
-		guestMiddleware.ThenFunc(app.loginPost),
+		dynamicMiddleware.ThenFunc(app.loginPost),
 	)
 	mux.Handle(
 		"GET /{$}",
-		guestMiddleware.ThenFunc(app.home),
+		dynamicMiddleware.ThenFunc(app.home),
 	)
 	mux.Handle(
 		"GET /snippets/view/{id}",
-		guestMiddleware.ThenFunc(app.snippetView),
+		dynamicMiddleware.ThenFunc(app.snippetView),
 	)
 
-	authMiddleware := guestMiddleware.Append(app.requireAuthentication)
+	authMiddleware := dynamicMiddleware.Append(app.requireAuthentication)
 
 	mux.Handle(
 		"GET /snippets/create",
