@@ -20,7 +20,7 @@ func (app *Application) routes() http.Handler {
 	// "/static" prefix before the request reaches the file server
 	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
 
-	guestMiddleware := alice.New(app.sessionManager.LoadAndSave)
+	guestMiddleware := alice.New(app.sessionManager.LoadAndSave, noSurf)
 
 	// Guest middleware
 	mux.Handle(
