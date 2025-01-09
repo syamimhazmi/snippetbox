@@ -1,3 +1,3 @@
 # snippetbox
 
-Building Web Application usin Go
+Building Web Application using Go
